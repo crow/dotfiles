@@ -141,6 +141,82 @@ function chezmoi-edit() {
     echo "Done! Changes applied."
 }
 
+# Interactive secret lookup -- copies a secret value to clipboard
+function chezmoi-secret() {
+    local secrets=()
+    local names=()
+    local i=1
+
+    # Decrypt and parse all export lines from .zshrc
+    local src="$HOME/.local/share/chezmoi/encrypted_dot_zshrc.age"
+    local age_key="$HOME/.config/chezmoi/key.txt"
+
+    if [[ ! -f "$src" ]]; then
+        echo "No encrypted .zshrc found."
+        return 1
+    fi
+
+    local decrypted
+    decrypted=$(age -d -i "$age_key" "$src" 2>/dev/null)
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to decrypt. Check your age key."
+        return 1
+    fi
+
+    # Also parse encrypted airship.zsh if it exists
+    local airship_src="$HOME/.local/share/chezmoi/dot_oh-my-zsh/custom/encrypted_airship.zsh.age"
+    if [[ -f "$airship_src" ]]; then
+        local airship_decrypted
+        airship_decrypted=$(age -d -i "$age_key" "$airship_src" 2>/dev/null)
+        if [[ $? -eq 0 ]]; then
+            decrypted="$decrypted"$'\n'"$airship_decrypted"
+        fi
+    fi
+
+    echo "Secrets:"
+    echo "─────────────────────────────────"
+
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^export[[:space:]]+([A-Za-z_][A-Za-z0-9_]*)=[\"\']?(.+?)[\"\']?$ ]]; then
+            local name="${match[1]}"
+            local value="${match[2]}"
+            # Strip trailing quote if present
+            value="${value%\"}"
+            value="${value%\'}"
+            names+=("$name")
+            secrets+=("$value")
+            printf "  %2d) %s\n" "$i" "$name"
+            ((i++))
+        fi
+    done <<< "$decrypted"
+
+    echo "─────────────────────────────────"
+    echo "   q) Quit"
+    echo ""
+
+    if (( ${#names[@]} == 0 )); then
+        echo "No secrets found."
+        return 1
+    fi
+
+    local choice
+    read "choice?Select a secret to copy: "
+
+    if [[ "$choice" == "q" || -z "$choice" ]]; then
+        echo "Cancelled."
+        return 0
+    fi
+
+    if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#secrets[@]} )); then
+        echo "Invalid selection."
+        return 1
+    fi
+
+    echo -n "${secrets[$choice]}" | pbcopy
+    echo ""
+    echo "Copied ${names[$choice]} to clipboard."
+}
+
 # PGP key paths
 export PGP_PUBLIC_KEY_PATH="$HOME/pgp/publickey.asc"
 export PGP_PRIVATE_KEY_PATH="$HOME/pgp/privatekey.asc"
