@@ -27,4 +27,18 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || { echo "Oh My Zsh install failed"; exit 1; }
 fi
 
+{{ if ne .profile "personal" -}}
+# Install node if not present (needed for Claude CLI)
+if ! command -v node &>/dev/null; then
+    echo "Installing node..."
+    brew install node || echo "node install failed, skipping"
+fi
+
+# Install Claude CLI if not present
+if ! command -v claude &>/dev/null; then
+    echo "Installing Claude CLI..."
+    npm install -g @anthropic-ai/claude-code || echo "Claude CLI install failed, skipping"
+fi
+{{ end -}}
+
 {{ end -}}
