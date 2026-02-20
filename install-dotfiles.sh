@@ -65,7 +65,7 @@ if [ -d "$HOME/.local/share/chezmoi" ]; then
     rm -rf "$HOME/.local/share/chezmoi"
 fi
 
-if chezmoi init --apply crow --ssh 2>/dev/null; then
+if chezmoi init --apply crow --ssh; then
     success "Done (via SSH)"
 else
     warn "SSH failed, trying HTTPS..."
