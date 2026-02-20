@@ -117,10 +117,13 @@ fi
 # Step 6: brew packages
 step 6 "Installing packages from Brewfile"
 brewfile="$HOME/.local/share/chezmoi/Brewfile"
-if [ -f "$brewfile" ]; then
-    brew bundle --file="$brewfile" --no-lock || warn "Some packages failed to install -- run 'brew bundle' manually to retry"
-else
-    warn "No Brewfile found, skipping"
+if [ ! -f "$brewfile" ]; then
+    warn "Brewfile not in local chezmoi dir, downloading from GitHub..."
+    brewfile=$(mktemp)
+    curl -fsSL "https://raw.githubusercontent.com/crow/dotfiles/main/Brewfile" -o "$brewfile" || { warn "Could not download Brewfile, skipping packages"; brewfile=""; }
+fi
+if [ -n "$brewfile" ] && [ -f "$brewfile" ]; then
+    brew bundle --file="$brewfile" --no-lock || warn "Some packages failed -- run 'brew bundle --file=~/.local/share/chezmoi/Brewfile' to retry"
 fi
 
 # Step 7: SSH key
