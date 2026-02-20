@@ -46,8 +46,21 @@ fi
 step 4 "Age decryption key"
 mkdir -p "$HOME/.config/chezmoi"
 
+# Ask for profile
+echo ""
+echo "  Which profile is this machine?"
+echo "    1) personal"
+echo "    2) work"
+echo ""
+read -p "  Profile (personal/work) [personal]: " profile_input
+case "$profile_input" in
+    work|2) profile="work" ;;
+    *)       profile="personal" ;;
+esac
+success "Profile: $profile"
+
 # Write chezmoi.toml FIRST so chezmoi never tries to prompt from the template
-cat > "$HOME/.config/chezmoi/chezmoi.toml" <<'EOF'
+cat > "$HOME/.config/chezmoi/chezmoi.toml" <<EOF
 encryption = "age"
 
 [age]
@@ -61,6 +74,7 @@ encryption = "age"
 [data]
     name = "David"
     email = "jdavidcrow@gmail.com"
+    profile = "$profile"
 EOF
 if [ -f "$HOME/.config/chezmoi/key.txt" ]; then
     success "Key already exists at ~/.config/chezmoi/key.txt"
@@ -135,7 +149,7 @@ CHEZMOI_CFG="$HOME/.config/chezmoi/chezmoi.toml"
 if [ ! -f "$CHEZMOI_CFG" ]; then
     warn "chezmoi.toml missing -- creating from known config"
     mkdir -p "$HOME/.config/chezmoi"
-    cat > "$CHEZMOI_CFG" <<'EOF'
+    cat > "$CHEZMOI_CFG" <<EOF
 encryption = "age"
 
 [age]
@@ -149,6 +163,7 @@ encryption = "age"
 [data]
     name = "David"
     email = "jdavidcrow@gmail.com"
+    profile = "$profile"
 EOF
     success "chezmoi.toml created"
 fi

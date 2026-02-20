@@ -1,0 +1,12 @@
+{{- if eq .profile "work" -}}
+# Work-specific configuration
+
+# Artifactory
+export ARTIFACTORY_SERVER=""
+export ARTIFACTORY_USER=""
+# ARTIFACTORY_API_KEY is in encrypted .zshrc — add via: chezmoi-edit → 0
+
+# Work-specific PATH additions (add as needed)
+# export PATH="...:$PATH"
+
+{{- end }}
