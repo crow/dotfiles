@@ -1,5 +1,8 @@
 # Development tools and PATH setup
 
+# Opens chezmoi source directory in Finder
+function chezmoidir() { open "$HOME/.local/share/chezmoi"; }
+
 # PATH additions
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH="/Applications/PrusaSlicer.app/Contents/MacOS:$PATH"
@@ -9,6 +12,22 @@ export PATH="$HOME/source/flutter:$PATH"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 export PGPT_PROFILES=ollama
+
+# fzf - fuzzy finder (Ctrl+R for history, Ctrl+T for files, Alt+C for cd)
+source <(fzf --zsh 2>/dev/null)
+export FZF_DEFAULT_OPTS="
+  --height=40%
+  --layout=reverse
+  --border=rounded
+  --info=inline
+  --prompt='> '
+  --pointer='▶'
+  --marker='✓'
+  --color=bg+:#073642,bg:#002b36,spinner:#2aa198,hl:#268bd2
+  --color=fg:#839496,header:#268bd2,info:#2aa198,pointer:#2aa198
+  --color=marker:#2aa198,fg+:#eee8d5,prompt:#cb4b16,hl+:#268bd2
+"
+export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window=down:3:wrap"
 
 # Creates a Python venv and installs requirements
 function useenv() {

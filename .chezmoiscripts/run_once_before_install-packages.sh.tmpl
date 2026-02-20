@@ -16,6 +16,12 @@ if ! command -v age &> /dev/null; then
     brew install age
 fi
 
+# Install fzf if not present
+if ! command -v fzf &> /dev/null; then
+    echo "Installing fzf..."
+    brew install fzf
+fi
+
 # Install Oh My Zsh if not present
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
     echo "Installing Oh My Zsh..."
