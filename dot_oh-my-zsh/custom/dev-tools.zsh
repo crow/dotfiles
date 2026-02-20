@@ -19,7 +19,7 @@ function chezmoidir() { open "$HOME/.local/share/chezmoi"; }
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH="/Applications/PrusaSlicer.app/Contents/MacOS:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
-export PATH="/usr/local/bin/uv:$PATH"
+export PATH="/usr/local/bin:$PATH"
 export PATH="$HOME/source/flutter:$PATH"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
@@ -206,17 +206,17 @@ function sshadd { ssh-add --apple-use-keychain ~/.ssh/id_ed25519 }
 
 # Python script wrappers
 function pyhello() {
-    python3 '$HOME/.oh-my-zsh/custom/pyhello.py' "$@"
+    python3 "$HOME/.oh-my-zsh/custom/pyhello.py" "$@"
 }
 
 function pytry() {
-    python3 '$HOME/.oh-my-zsh/custom/pytry.py' "$@"
+    python3 "$HOME/.oh-my-zsh/custom/pytry.py" "$@"
 }
 
 function mcolors() {
-    python3 '$HOME/.oh-my-zsh/custom/mcolors.py' "$@"
+    python3 "$HOME/.oh-my-zsh/custom/mcolors.py" "$@"
 }
 
 function gen_colorsets() {
-    python3 '$HOME/.oh-my-zsh/custom/gen_colorsets.py' "$@"
+    python3 "$HOME/.oh-my-zsh/custom/gen_colorsets.py" "$@"
 }

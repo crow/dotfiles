@@ -54,7 +54,7 @@ function resolveall() {
 
 # Deletes files that git reports as deleted
 function gdel() {
-    git status | grep "deleted" | awk '{print $4}' | rm
+    git status | grep "deleted" | awk '{print $4}' | xargs rm
 }
 
 # Cherry-picks last commit from testing branch
