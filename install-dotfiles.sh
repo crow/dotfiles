@@ -58,6 +58,18 @@ fi
 # Step 4: Init and apply dotfiles
 # chezmoi will prompt for profile (personal/work/bot) and handle everything else
 step 4 "Initializing dotfiles"
+CHEZMOI_DIR="$HOME/.local/share/chezmoi"
+if [ -d "$CHEZMOI_DIR/.git" ]; then
+    existing_remote=$(git -C "$CHEZMOI_DIR" remote get-url origin 2>/dev/null || echo "unknown")
+    if echo "$existing_remote" | grep -q "crow/dotfiles"; then
+        success "Correct repo already present"
+    else
+        warn "Wrong repo at $CHEZMOI_DIR (remote: $existing_remote)"
+        warn "Backing up to ${CHEZMOI_DIR}.bak and re-cloning..."
+        mv "$CHEZMOI_DIR" "${CHEZMOI_DIR}.bak"
+    fi
+fi
+
 if chezmoi init --apply crow --ssh 2>/dev/null; then
     success "Done (via SSH)"
 else
