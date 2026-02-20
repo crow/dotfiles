@@ -64,9 +64,8 @@ if [ -d "$CHEZMOI_DIR/.git" ]; then
     if echo "$existing_remote" | grep -q "crow/dotfiles"; then
         success "Correct repo already present"
     else
-        warn "Wrong repo at $CHEZMOI_DIR (remote: $existing_remote)"
-        warn "Backing up to ${CHEZMOI_DIR}.bak and re-cloning..."
-        mv "$CHEZMOI_DIR" "${CHEZMOI_DIR}.bak"
+        warn "Wrong repo found ($existing_remote), removing..."
+        rm -rf "$CHEZMOI_DIR"
     fi
 fi
 
