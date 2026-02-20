@@ -58,7 +58,12 @@ fi
 # Step 4: Init and apply dotfiles
 # chezmoi will prompt for profile (personal/work/bot) and handle everything else
 step 4 "Initializing dotfiles"
-rm -rf "$HOME/.local/share/chezmoi"
+if [ -d "$HOME/.local/share/chezmoi" ]; then
+    echo ""
+    read -p "  Remove existing ~/.local/share/chezmoi and re-clone fresh? (y/n): " confirm_rm
+    [[ "$confirm_rm" == "y" ]] || die "Cancelled. Remove ~/.local/share/chezmoi manually and re-run."
+    rm -rf "$HOME/.local/share/chezmoi"
+fi
 
 if chezmoi init --apply crow --ssh 2>/dev/null; then
     success "Done (via SSH)"
