@@ -19,36 +19,50 @@ function genlinkfile {
     echo "Done! 'LinkFile.webloc' created on Desktop."
 }
 
-# Saves clipboard Python code as a callable function
-function clipfunc() {
-    if [ -z "$1" ]; then
-        echo "Usage: clipfunc function_name"
+# Interactive chezmoi file editor
+# Lists managed files, lets you pick one to edit, then applies changes
+function chezmoi-edit() {
+    local files=()
+    local i=1
+
+    echo "Chezmoi managed files:"
+    echo "─────────────────────────────────"
+
+    while IFS= read -r file; do
+        files+=("$file")
+        printf "  %2d) %s\n" "$i" "$file"
+        ((i++))
+    done < <(chezmoi managed --include=files | sort)
+
+    echo "─────────────────────────────────"
+    echo "  q) Quit"
+    echo ""
+
+    local choice
+    read "choice?Select a file to edit: "
+
+    if [[ "$choice" == "q" || -z "$choice" ]]; then
+        echo "Cancelled."
+        return 0
+    fi
+
+    if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#files[@]} )); then
+        echo "Invalid selection."
         return 1
     fi
-    function_name="$1"
-    script_path="$HOME/.oh-my-zsh/custom/${function_name}.py"
 
-    pbpaste > "$script_path"
+    local target="${files[$choice]}"
+    echo ""
+    echo "Opening: $target"
+    chezmoi edit "$HOME/$target"
 
-    if ! python3 -m py_compile "$script_path" 2>/dev/null; then
-        echo "Clipboard does not contain valid Python code. Function not created."
-        rm "$script_path"
-        return 1
-    fi
-
-    chmod +x "$script_path"
-
-    eval "function $function_name() {
-        python3 '$script_path' \"\$@\"
-    }"
-
-    echo "function $function_name() {
-    python3 '$script_path' \"\$@\"
-}
-" >> ~/.oh-my-zsh/custom/dev-tools.zsh
-
-    echo "Function '$function_name' has been created and saved."
-    source ~/.oh-my-zsh/custom/dev-tools.zsh
+    echo ""
+    read "?Press Enter when done editing to apply changes (or Ctrl-C to cancel)..."
+    echo ""
+    echo "Applying changes..."
+    chezmoi apply -v
+    echo ""
+    echo "Done! Changes applied."
 }
 
 # PGP key paths
