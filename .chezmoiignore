@@ -3,3 +3,4 @@ LICENSE
 .DS_Store
 bootstrap.sh
 install-dotfiles.sh
+Brewfile

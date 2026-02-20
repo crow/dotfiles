@@ -68,12 +68,22 @@ fi
 
 # Step 5: chezmoi init + apply
 echo ""
-echo "[5/5] Cloning and applying dotfiles..."
+echo "[5/7] Cloning and applying dotfiles..."
 chezmoi init crow --ssh --apply -v
 
-# Step 6: Optional SSH key setup
+# Step 6: Install all brew packages from Brewfile
 echo ""
-echo "[6/6] SSH key setup"
+echo "[6/7] Installing packages from Brewfile..."
+brewfile="$HOME/.local/share/chezmoi/Brewfile"
+if [ -f "$brewfile" ]; then
+    brew bundle --file="$brewfile" --no-lock
+else
+    echo "  No Brewfile found, skipping."
+fi
+
+# Step 7: Optional SSH key setup
+echo ""
+echo "[7/7] SSH key setup"
 
 if ls "$HOME/.ssh/id_"* &>/dev/null; then
     echo "  SSH keys already exist:"

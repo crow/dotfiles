@@ -40,6 +40,23 @@ export FZF_DEFAULT_OPTS="
 "
 export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window=down:3:wrap"
 
+# zoxide - smarter cd (use 'z' instead of 'cd')
+eval "$(zoxide init zsh 2>/dev/null)"
+
+# bat - cat with syntax highlighting
+if command -v bat &>/dev/null; then
+    alias cat='bat --paging=never'
+    alias catp='bat'
+    export BAT_THEME="Solarized (dark)"
+fi
+
+# eza - modern ls with git integration
+if command -v eza &>/dev/null; then
+    alias ls='eza --icons --group-directories-first'
+    alias ll='eza --icons --group-directories-first -la'
+    alias lt='eza --icons --group-directories-first --tree --level=2'
+fi
+
 # Creates a Python venv and installs requirements
 function useenv() {
     python3 -m venv .venv
