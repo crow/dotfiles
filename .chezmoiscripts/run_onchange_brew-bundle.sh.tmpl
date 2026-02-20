@@ -2,13 +2,13 @@
 
 {{ if eq .profile "personal" -}}
 # {{ include "Brewfile" | sha256sum }}
-echo "Installing all packages from Brewfile..."
-brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile"
+echo "Installing packages from Brewfile..."
+brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile" || echo "Some Brewfile packages failed — run 'brew bundle --file=~/.local/share/chezmoi/Brewfile' to retry"
 
 {{ else -}}
 # Core shell tools only (work/bot profiles skip the full Brewfile)
 for tool in bat eza zoxide gh; do
-    command -v "$tool" &>/dev/null || brew install "$tool"
+    command -v "$tool" &>/dev/null || brew install "$tool" || echo "$tool install failed, skipping"
 done
 
 {{ end -}}
