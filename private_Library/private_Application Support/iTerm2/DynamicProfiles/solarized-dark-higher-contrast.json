@@ -142,8 +142,8 @@
         "Blue Component": 0.282,
         "Color Space": "sRGB"
       },
-      "Normal Font": "MesloLGSNerdFontMono-Regular 13",
-      "Non Ascii Font": "MesloLGSNerdFontMono-Regular 13",
+      "Normal Font": "MesloLGSNFM-Regular 13",
+      "Non Ascii Font": "MesloLGSNFM-Regular 13",
       "Use Non-ASCII Font": false,
       "Option Key Sends": 2,
       "Right Option Key Sends": 2,
