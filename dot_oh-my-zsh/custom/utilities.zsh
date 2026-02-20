@@ -50,10 +50,77 @@ function chezmoi-edit() {
     local target
     if [[ "$choice" == "0" ]]; then
         target=".zshrc"
+        local secret_value=$(pbpaste 2>/dev/null)
+
+        if [[ -z "$secret_value" ]]; then
+            echo "Clipboard is empty. Copy your secret first."
+            return 1
+        fi
+
+        # Parse clipboard -- handle KEY=value, export KEY="value", or raw value
+        local key_name=""
+        local key_value=""
+        if [[ "$secret_value" =~ ^(export[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*)=[\"\']?(.+?)[\"\']?$ ]]; then
+            key_name="${match[2]}"
+            key_value="${match[3]}"
+        else
+            key_value="$secret_value"
+        fi
+
+        # Show what we found
         echo ""
-        echo "Opening .zshrc (encrypted) to add secret..."
-        echo "  Add your key as: export KEY_NAME=\"value\""
+        if [[ -n "$key_name" ]]; then
+            echo "Detected: $key_name"
+        else
+            echo "Clipboard value: ${key_value:0:20}..."
+            read "key_name?Enter variable name (e.g. OPENAI_API_KEY): "
+            if [[ -z "$key_name" ]]; then
+                echo "No name provided. Cancelled."
+                return 1
+            fi
+        fi
+
+        # Confirm
         echo ""
+        echo "Will add to .zshrc:"
+        echo "  export ${key_name}=\"${key_value:0:20}...\""
+        echo ""
+        local confirm
+        read "confirm?Proceed? (y/n): "
+        if [[ "$confirm" != "y" ]]; then
+            echo "Cancelled."
+            return 0
+        fi
+
+        # Decrypt, append, re-encrypt
+        local src="$HOME/.local/share/chezmoi/encrypted_dot_zshrc.age"
+        local age_key="$HOME/.config/chezmoi/key.txt"
+        local recipient=$(grep 'recipient' "$HOME/.config/chezmoi/chezmoi.toml" | sed 's/.*= *"\(.*\)"/\1/')
+        local tmpfile=$(mktemp)
+
+        age -d -i "$age_key" "$src" > "$tmpfile" 2>/dev/null
+        if [[ $? -ne 0 ]]; then
+            echo "Failed to decrypt .zshrc. Check your age key."
+            rm -f "$tmpfile"
+            return 1
+        fi
+
+        echo "export ${key_name}=\"${key_value}\"" >> "$tmpfile"
+        age -e -r "$recipient" -o "$src" "$tmpfile" 2>/dev/null
+        rm -f "$tmpfile"
+
+        echo ""
+        echo "Secret added. Opening .zshrc for review..."
+        chezmoi edit "$HOME/$target"
+
+        echo ""
+        read "?Press Enter when done reviewing to apply changes (or Ctrl-C to cancel)..."
+        echo ""
+        echo "Applying changes..."
+        chezmoi apply -v
+        echo ""
+        echo "Done! Run 'exec zsh' to load the new key."
+        return 0
     elif [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#files[@]} )); then
         target="${files[$choice]}"
         echo ""
