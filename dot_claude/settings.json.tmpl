@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/Users/david/.claude/hooks/gsd-check-update.js\""
+            "command": "node \"{{ .chezmoi.homeDir }}/.claude/hooks/gsd-check-update.js\""
           }
         ]
       }
@@ -13,7 +13,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "node \"/Users/david/.claude/hooks/gsd-statusline.js\""
+    "command": "node \"{{ .chezmoi.homeDir }}/.claude/hooks/gsd-statusline.js\""
   },
   "enabledPlugins": {
     "context7@claude-plugins-official": true,
@@ -29,7 +29,7 @@
       "args": [
         "run",
         "--directory",
-        "/Users/david/source/internal-airship-mcp/airship-docs",
+        "{{ .chezmoi.homeDir }}/source/internal-airship-mcp/airship-docs",
         "airship-docs"
       ]
     },
@@ -38,7 +38,7 @@
       "args": [
         "run",
         "--directory",
-        "/Users/david/source/internal-airship-mcp/airship-api",
+        "{{ .chezmoi.homeDir }}/source/internal-airship-mcp/airship-api",
         "airship-api"
       ],
       "env": {
@@ -52,7 +52,7 @@
       "args": [
         "run",
         "--directory",
-        "/Users/david/source/internal-airship-mcp/airship-custom-views",
+        "{{ .chezmoi.homeDir }}/source/internal-airship-mcp/airship-custom-views",
         "airship-custom-views"
       ]
     },
@@ -61,7 +61,7 @@
       "args": [
         "run",
         "--directory",
-        "/Users/david/source/internal-airship-mcp/airship_migration",
+        "{{ .chezmoi.homeDir }}/source/internal-airship-mcp/airship_migration",
         "airship-migration"
       ]
     },
@@ -70,7 +70,7 @@
       "args": [
         "run",
         "--directory",
-        "/Users/david/source/internal-airship-mcp/airship-sample-generator",
+        "{{ .chezmoi.homeDir }}/source/internal-airship-mcp/airship-sample-generator",
         "airship-sample-generator"
       ]
     },
@@ -89,7 +89,7 @@
         "--rm",
         "-i",
         "-v",
-        "/Users/david/source:/workspace",
+        "{{ .chezmoi.homeDir }}/source:/workspace",
         "ghcr.io/giginet/xcodeproj-mcp-server",
         "/workspace"
       ]

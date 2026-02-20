@@ -10,4 +10,4 @@ alias python=python3
 alias pip=pip3
 alias zshconfig="code ~/.zshrc"
 alias ohmyzsh="code ~/.oh-my-zsh"
-alias claude="/Users/david/.claude/local/claude"
+alias claude="$HOME/.claude/local/claude"

@@ -5,7 +5,7 @@ export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH="/Applications/PrusaSlicer.app/Contents/MacOS:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/local/bin/uv:$PATH"
-export PATH="/Users/david/source/flutter:$PATH"
+export PATH="$HOME/source/flutter:$PATH"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 export PGPT_PROFILES=ollama
@@ -52,7 +52,7 @@ copy_swift_files() {
     fi
 
     local parent_folder_name=$(basename "$source_dir")
-    local destination_dir="/Users/david/Desktop/${parent_folder_name}"
+    local destination_dir="$HOME/Desktop/${parent_folder_name}"
     mkdir -p "$destination_dir"
 
     find "$source_dir" -type f -name "*.swift" -exec cp -- {} "$destination_dir" \;
