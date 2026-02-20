@@ -280,6 +280,115 @@ function chezmoi-secret() {
     echo "Copied ${selected_name} to clipboard."
 }
 
+# Manages which secrets are shared with the bot profile
+# Run this on your personal machine to select a subset of secrets for bots/servers
+function chezmoi-bot-secrets() {
+    local src="$HOME/.local/share/chezmoi/encrypted_dot_zshrc.age"
+    local bot_src="$HOME/.local/share/chezmoi/dot_oh-my-zsh/custom/encrypted_bot_secrets.zsh.age"
+    local age_key="$HOME/.config/chezmoi/key.txt"
+    local recipient=$(grep 'recipient' "$HOME/.config/chezmoi/chezmoi.toml" | sed 's/.*= *"\(.*\)"/\1/')
+
+    local decrypted
+    decrypted=$(age -d -i "$age_key" "$src" 2>/dev/null)
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to decrypt .zshrc. Check your age key."
+        return 1
+    fi
+
+    local -a names lines
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^export[[:space:]]+([A-Za-z_][A-Za-z0-9_]*)= ]]; then
+            names+=("${match[1]}")
+            lines+=("$line")
+        fi
+    done <<< "$decrypted"
+
+    if (( ${#names[@]} == 0 )); then
+        echo "No secrets found."
+        return 1
+    fi
+
+    # Load current bot selection
+    local -A selected
+    if [[ -f "$bot_src" ]]; then
+        local bot_decrypted
+        bot_decrypted=$(age -d -i "$age_key" "$bot_src" 2>/dev/null)
+        while IFS= read -r line; do
+            if [[ "$line" =~ ^export[[:space:]]+([A-Za-z_][A-Za-z0-9_]*)= ]]; then
+                local n="${match[1]}"
+                for i in {1..${#names[@]}}; do
+                    [[ "${names[$i]}" == "$n" ]] && selected[$i]=1
+                done
+            fi
+        done <<< "$bot_decrypted"
+    fi
+
+    _bot_list() {
+        echo ""
+        echo "Bot profile secrets (✓ = included):"
+        echo "─────────────────────────────────"
+        for i in {1..${#names[@]}}; do
+            local marker=" "
+            [[ -n "${selected[$i]}" ]] && marker="✓"
+            printf "  [%s] %2d) %s\n" "$marker" "$i" "${names[$i]}"
+        done
+        echo "─────────────────────────────────"
+        echo "  Toggle: enter numbers (space-separated)"
+        echo "  a=all  n=none  done=save  q=quit"
+    }
+
+    _bot_list
+    while true; do
+        local input
+        read "input?> "
+        case "$input" in
+            done) break ;;
+            q|Q) echo "Cancelled."; unfunction _bot_list; return 0 ;;
+            a) for i in {1..${#names[@]}}; do selected[$i]=1; done; _bot_list ;;
+            n) selected=(); _bot_list ;;
+            *)
+                local changed=0
+                for token in ${(s: :)input}; do
+                    if [[ "$token" =~ ^[0-9]+$ ]] && (( token >= 1 && token <= ${#names[@]} )); then
+                        if [[ -n "${selected[$token]}" ]]; then
+                            unset "selected[$token]"
+                        else
+                            selected[$token]=1
+                        fi
+                        changed=1
+                    fi
+                done
+                (( changed )) && _bot_list
+                ;;
+        esac
+    done
+
+    unfunction _bot_list
+
+    local tmpfile=$(mktemp)
+    printf "# Bot profile secrets — managed via chezmoi-bot-secrets\n" > "$tmpfile"
+    local count=0
+    for i in {1..${#names[@]}}; do
+        if [[ -n "${selected[$i]}" ]]; then
+            echo "${lines[$i]}" >> "$tmpfile"
+            ((count++))
+        fi
+    done
+
+    age -e -r "$recipient" -o "$bot_src" "$tmpfile" 2>/dev/null
+    local rc=$?
+    rm -f "$tmpfile"
+
+    if [[ $rc -ne 0 ]]; then
+        echo "Failed to encrypt bot secrets."
+        return 1
+    fi
+
+    echo ""
+    echo "$count secret(s) saved to bot profile. Applying..."
+    chezmoi apply -v
+}
+
 # PGP key paths
 export PGP_PUBLIC_KEY_PATH="$HOME/pgp/publickey.asc"
 export PGP_PRIVATE_KEY_PATH="$HOME/pgp/privatekey.asc"

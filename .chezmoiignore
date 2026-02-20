@@ -4,3 +4,6 @@ LICENSE
 bootstrap.sh
 install-dotfiles.sh
 Brewfile
+{{ if ne .profile "bot" -}}
+.oh-my-zsh/custom/bot_secrets.zsh
+{{ end -}}

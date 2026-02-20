@@ -51,11 +51,13 @@ echo ""
 echo "  Which profile is this machine?"
 echo "    1) personal"
 echo "    2) work"
+echo "    3) bot"
 echo ""
-read -p "  Profile (personal/work) [personal]: " profile_input
+read -p "  Profile (personal/work/bot) [personal]: " profile_input
 case "$profile_input" in
     work|2) profile="work" ;;
-    *)       profile="personal" ;;
+    bot|3)  profile="bot" ;;
+    *)      profile="personal" ;;
 esac
 success "Profile: $profile"
 
