@@ -69,6 +69,9 @@ brew "repomix"
 brew "sshpass"
 brew "tailscale"
 
+# Fonts
+cask "font-meslo-lg-nerd-font"
+
 # Casks
 cask "chromium"
 cask "dotnet-sdk"

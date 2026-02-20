@@ -1,15 +1,16 @@
 # Development tools and PATH setup
 
-# Auto-reload shell when config changes (checks on each prompt)
-_SHELL_CONFIG_HASH=$(cat "$HOME/.zshrc" "$HOME/.oh-my-zsh/custom/"*.zsh 2>/dev/null | md5)
+# Auto-reload shell when config changes (checks before each command and prompt)
+_SHELL_CONFIG_SIG=$(stat -f '%m' "$HOME/.zshrc" "$HOME/.oh-my-zsh/custom/"*.zsh 2>/dev/null | md5)
 _shell_autoreload() {
-    local current_hash=$(cat "$HOME/.zshrc" "$HOME/.oh-my-zsh/custom/"*.zsh 2>/dev/null | md5)
-    if [[ "$current_hash" != "$_SHELL_CONFIG_HASH" ]]; then
+    local current_sig=$(stat -f '%m' "$HOME/.zshrc" "$HOME/.oh-my-zsh/custom/"*.zsh 2>/dev/null | md5)
+    if [[ "$current_sig" != "$_SHELL_CONFIG_SIG" ]]; then
         echo "Shell config changed, reloading..."
         exec zsh
     fi
 }
 precmd_functions+=(_shell_autoreload)
+preexec_functions+=(_shell_autoreload)
 
 # Opens chezmoi source directory in Finder
 function chezmoidir() { open "$HOME/.local/share/chezmoi"; }
