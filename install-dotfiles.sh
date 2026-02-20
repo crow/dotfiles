@@ -63,6 +63,7 @@ if [ -d "$HOME/.local/share/chezmoi" ]; then
     read -p "  Remove existing ~/.local/share/chezmoi and re-clone fresh? (y/n): " confirm_rm
     [[ "$confirm_rm" == "y" ]] || die "Cancelled. Remove ~/.local/share/chezmoi manually and re-run."
     rm -rf "$HOME/.local/share/chezmoi"
+    rm -f "$HOME/.config/chezmoi/chezmoi.toml"
 fi
 
 if chezmoi init --apply crow --ssh; then
@@ -72,6 +73,8 @@ else
     chezmoi init --apply https://github.com/crow/dotfiles.git || die "chezmoi init failed"
     success "Done (via HTTPS)"
 fi
+
+chezmoi apply || warn "Some files may not have applied cleanly -- run 'chezmoi apply -v' to inspect"
 
 # Step 5: SSH key (optional)
 step 5 "SSH key setup"
