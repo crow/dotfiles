@@ -20,7 +20,7 @@ fi
 
 # Init from GitHub (runs before-scripts: installs brew, omz)
 echo "Initializing chezmoi from GitHub..."
-chezmoi init jdavidcrow --ssh
+chezmoi init crow --ssh
 
 # Prompt for age key
 echo ""
