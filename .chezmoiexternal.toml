@@ -1,0 +1,4 @@
+[".oh-my-zsh/custom/plugins/history-search-multi-word"]
+    type = "git-repo"
+    url = "https://github.com/zdharma-continuum/history-search-multi-word.git"
+    refreshPeriod = "168h"

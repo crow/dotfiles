@@ -1,0 +1,718 @@
+{{ $airship := index (lastpass "Dotfiles/Airship Keys") 0 -}}
+
+# Airship push functions
+# Keys are populated from LastPass at chezmoi apply time
+
+export defaultAppKey={{ $airship.note.DevAppKey | quote }}
+export defaultAppSecret={{ $airship.note.DevAppMasterSecret | quote }}
+export goatAppKey={{ $airship.note.GoatAppKey | quote }}
+export goatAppSecret={{ $airship.note.GoatAppMasterSecret | quote }}
+export accAppKey={{ $airship.note.A11yAppKey | quote }}
+export accAppSecret={{ $airship.note.A11yAppMasterSecret | quote }}
+
+function push() {
+  local appKey=${1:-$defaultAppKey}
+  local appSecret=${2:-$defaultAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl https://go.urbanairship.com/api/push \
+    -u "$appKey:$appSecret" \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/vnd.urbanairship+json; version=3;' \
+    -d @- <<EOF
+{
+  "audience": {
+      "tag": "david"
+  },
+  "device_types": [
+      "ios"
+  ],
+  "notification": {
+      "alert": "Hey there! Don't forget to drink water and stay hydrated!",
+         "ios": {
+                  "content_available": 1,
+                     "badge": 1
+      }
+  }
+}
+EOF
+}
+
+function push_acc() {
+  local appKey=${1:-$accAppKey}
+  local appSecret=${2:-$accAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl https://go.urbanairship.com/api/push \
+    -u "$appKey:$appSecret" \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/vnd.urbanairship+json; version=3;' \
+    -d @- <<EOF
+{
+  "audience": {
+      "tag": "david"
+  },
+  "device_types": [
+      "ios"
+  ],
+  "notification": {
+      "alert": "Hey there! Don't forget to drink water and stay hydrated!",
+         "ios": {
+                  "content_available": 1
+      }
+  }
+}
+EOF
+}
+
+function pushiam() {
+  local appKey=${1:-$defaultAppKey}
+  local appSecret=${2:-$defaultAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl https://go.urbanairship.com/api/push \
+    -u "$appKey:$appSecret" \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/vnd.urbanairship+json; version=3;' \
+    -d @- <<EOF
+{
+  "device_types": ["ios"],
+  "audience": {
+    "tag": "david"
+  },
+  "in_app": {
+    "alert": "Airship test",
+    "display_type": "banner",
+    "display": {
+      "position": "top"
+    },
+    "actions": {
+      "open": {
+        "type": "deep_link",
+        "content": "www.airship.com"
+      }
+    }
+  }
+}
+EOF
+}
+
+function pushiam3() {
+  local appKey=${1:-$defaultAppKey}
+  local appSecret=${2:-$defaultAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl https://go.urbanairship.com/api/push \
+    -u "$appKey:$appSecret" \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/vnd.urbanairship+json; version=3;' \
+    -d @- <<EOF
+{
+       "audience": {
+          "tag": "david"
+        },
+        "device_types": [
+            "ios"
+        ],
+        "notification": {
+            "ios": {
+                "alert": "Grab your crew, and lock-in your tickets to Homecoming!",
+                "badge": "+1",
+                "expiry": 25200
+            }
+        },
+        "message": {
+            "title": "H-D Homecoming Festival Tickets Are Selling Fast!",
+            "body": "<MESSAGEHTML>",
+            "content_type": "text/html",
+            "content_encoding": "utf-8",
+            "extra": {
+                "com.urbanairship.listing.template": "image"
+            },
+            "options": {
+                "asset_hosted": true
+            }
+        },
+        "options": {
+            "expiry": 25200,
+            "message_name": "HoCo Plan for Summer_iOS_1day"
+        },
+        "in_app": {
+            "alert": "Grab your crew, and lock-in your tickets to Homecoming!",
+            "display_type": "banner",
+            "expiry": "25200",
+            "display": {
+                "primary_color": "#ff6600",
+                "secondary_color": "#000000",
+                "position": "top"
+            }
+        }
+}
+EOF
+}
+
+function pushiam4() {
+  local appKey=${1:-$defaultAppKey}
+  local appSecret=${2:-$defaultAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl https://go.urbanairship.com/api/push \
+    -u "$appKey:$appSecret" \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/vnd.urbanairship+json; version=3;' \
+    -d @- <<EOF
+{
+"device_types": ["ios"], "audience": {"tag": "david"}, "notification": {"ios": {"badge": "+1"}}, "message": {"content_type": "text/html", "body": "<!doctype html><html><head><meta charset=\"utf-8\"><title></title></head><body><div>Milwaukee Buy More, Get More</div></body></html>", "title": "Milwaukee Buy More, Get More GOING ON NOW!"}
+}
+EOF
+}
+
+function pushiamgoat() {
+  local appKey=${1:-$goatAppKey}
+  local appSecret=${2:-$goatAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl https://go.urbanairship.com/api/push \
+    -u "$appKey:$appSecret" \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/vnd.urbanairship+json; version=3;' \
+    -d @- <<EOF
+{
+  "device_types": ["ios"],
+  "audience": {
+    "tag": "david"
+  },
+  "in_app": {
+    "alert": "Airship test",
+    "display_type": "banner",
+    "display": {
+      "position": "top"
+    },
+    "actions": {
+      "open": {
+        "type": "deep_link",
+        "content": "www.airship.com"
+      }
+    }
+  }
+}
+EOF
+}
+
+function pushiamchan() {
+  local appKey=${1:-$defaultAppKey}
+  local appSecret=${2:-$defaultAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl https://go.urbanairship.com/api/push \
+    -u "$appKey:$appSecret" \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/vnd.urbanairship+json; version=3;' \
+    -d @- <<EOF
+{
+  "device_types": ["ios"],
+  "audience": {
+    "channel": "30420308-8353-4508-9962-a89537ee4d67"
+  },
+  "in_app": {
+    "alert": "Airship test",
+    "display_type": "banner",
+    "display": {
+      "position": "bottom"
+    },
+    "actions": {
+      "open": {
+        "type": "deep_link",
+        "content": "com"
+      }
+    }
+  },
+  "options": {
+    "__ui_id": "fsJd5goLRViUGdLC79SB9g"
+  }
+}
+EOF
+}
+
+function pushinteractive() {
+  local appKey=${1:-$defaultAppKey}
+  local appSecret=${2:-$defaultAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl https://go.urbanairship.com/api/push \
+    -u "$appKey:$appSecret" \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/vnd.urbanairship+json; version=3;' \
+    -d @- <<EOF
+{
+  "device_types": [ "ios"],
+  "audience": {
+     "tag": "david"
+  },
+  "notification": {
+    "ios": {
+      "alert": "Hi",
+      "interactive": {
+        "type": "ua_buy_now",
+        "button_actions": {
+          "buy_now": {"add_tag": "buy_now_tapped"}
+        }
+      }
+    }
+  },
+  "localizations": [
+      {
+         "language": "fr",
+         "notification": {
+            "alert": "Bonjour",
+               "interactive": {
+            "type": "ua_buy_now",
+            "button_actions": {
+              "buy_now": {"add_tag": "buy_now_tapped"}
+            }
+          }
+         }
+      },
+      {
+         "language": "de",
+         "notification": {
+            "alert": "Guten Tag",
+               "interactive": {
+            "type": "ua_buy_now",
+            "button_actions": {
+              "buy_now": {"add_tag": "buy_now_tapped"}
+            }
+          }
+         }
+      }
+  ]
+}
+EOF
+}
+
+function pushinteractivegoat() {
+  local appKey=${1:-$goatAppKey}
+  local appSecret=${2:-$goatAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl https://go.urbanairship.com/api/push \
+    -u "$appKey:$appSecret" \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/vnd.urbanairship+json; version=3;' \
+    -d @- <<EOF
+{
+  "device_types": [ "ios"],
+  "audience": {
+     "tag": "david"
+  },
+  "notification": {
+    "ios": {
+      "alert": "Hi",
+      "interactive": {
+        "type": "ua_buy_now",
+        "button_actions": {
+          "buy_now": {"add_tag": "buy_now_tapped"}
+        }
+      }
+    }
+  },
+  "localizations": [
+      {
+         "language": "fr",
+         "notification": {
+            "alert": "Bonjour",
+               "interactive": {
+            "type": "ua_buy_now",
+            "button_actions": {
+              "buy_now": {"add_tag": "buy_now_tapped"}
+            }
+          }
+         }
+      },
+      {
+         "language": "de",
+         "notification": {
+            "alert": "Guten Tag",
+               "interactive": {
+            "type": "ua_buy_now",
+            "button_actions": {
+              "buy_now": {"add_tag": "buy_now_tapped"}
+            }
+          }
+         }
+      }
+  ]
+}
+EOF
+}
+
+function push_mc() {
+  local appKey=${1:-$defaultAppKey}
+  local appSecret=${2:-$defaultAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl https://go.urbanairship.com/api/push \
+    -u "$appKey:$appSecret" \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/vnd.urbanairship+json; version=3;' \
+    -d @- <<EOF
+{
+    "audience": {
+      "tag" : "david"
+    },
+    "device_types": [
+        "ios"
+    ],
+    "message": {
+        "title": "Message Center Test",
+        "body": "<html><body><p>Test message center content</p></body></html>",
+        "content_type": "text/html",
+        "content_encoding": "utf-8"
+    },
+    "in_app": {
+        "alert": "We have important information for you. Click here to find out more.",
+        "display_type": "banner",
+        "display": {
+            "position": "top"
+        }
+    }
+}
+EOF
+}
+
+function push_mc_dl() {
+  local appKey=${1:-$defaultAppKey}
+  local appSecret=${2:-$defaultAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl -v -X POST -u "$appKey:$appSecret" -H "Content-type: application/json" -H "Accept: application/vnd.urbanairship+json; version=3;" --data @- https://go.urbanairship.com/api/push <<EOF
+{
+  "audience": {
+      "tag": "david"
+  },
+    "notification": {
+    "ios": {
+      "title": "Thanks for using your AZhelps Savings Card!",
+      "alert": "If you'd like to be notified automatically when it's time to refill this medication, opt in now.",
+      "actions": {
+        "open": {
+          "type": "deep_link",
+          "content": "uairship://message_center"
+        }
+      }
+    },
+    "android": {
+      "alert": "Where do I add my message center message?",
+      "actions": {
+        "open": {
+          "type": "deep_link",
+          "content": "uairship://message_center"
+        }
+      }
+    }
+  },
+  "message": {
+    "title": "Thanks for using your AZhelps Savings Card!",
+    "body": "<html><body><button onclick=\"window.location.href='uairship://run-basic-actions?share_action=Share%20this%20message%20with%20friends!';\">Share</button></body></html>",
+    "content_type": "text/html"
+  },
+  "device_types": ["ios", "android"]
+}
+EOF
+}
+
+function push_mc_dl2() {
+  local appKey=${1:-$defaultAppKey}
+  local appSecret=${2:-$defaultAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl -v -X POST -u "$appKey:$appSecret" -H "Content-type: application/json" -H "Accept: application/vnd.urbanairship+json; version=3;" --data @- https://go.urbanairship.com/api/push <<EOF
+{
+  "device_types": ["ios", "android", "amazon"],
+  "audience": {
+      "tag": "david"
+  },
+  "notification": {
+    "ios": {
+      "alert": "Where do I add my message center message?",
+      "actions": {
+          "open": {
+            "type": "deep_link",
+            "content": "message_center",
+            "fallback_url": "https://www.urbanairship.com/settings"
+          }
+      }
+    },
+    "android": {
+      "alert": "Where do I add my message center message?",
+      "actions": {
+          "open": {
+            "type": "deep_link",
+            "content": "message_center",
+            "fallback_url": "https://www.urbanairship.com/settings"
+          }
+      }
+    },
+    "amazon": {
+      "alert": "Where do I add my message center message?",
+      "actions": {
+        "open": {
+          "type": "deep_link",
+          "content": "uairship://app_settings"
+        }
+      }
+    }
+  },
+  "message_type": "commercial",
+  "options": {
+    "__ui_id": "q5UjEW9GQwyqLGXURUfGdA"
+  }
+}
+EOF
+}
+
+function push_mc_oua() {
+  local appKey=${1:-$defaultAppKey}
+  local appSecret=${2:-$defaultAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl -v -X POST -u "$appKey:$appSecret" -H "Content-type: application/json" -H "Accept: application/vnd.urbanairship+json; version=3;" --data @- https://go.urbanairship.com/api/push <<EOF
+{
+  "audience": "all",
+  "device_types": ["android", "ios"],
+  "notification": {
+    "alert": "getting this?",
+    "actions": {
+      "app_defined": {
+          "^u": "https://docs.airship.com/"
+        }
+    }
+  }
+}
+EOF
+}
+
+function goat_push_mc() {
+  local appKey=${1:-$goatAppKey}
+  local appSecret=${2:-$goatAppSecret}
+
+  if [[ -z $appKey ]]; then
+    read -p "Enter App Key: " appKey
+  fi
+
+  if [[ -z $appSecret ]]; then
+    read -p "Enter App Secret: " appSecret
+  fi
+
+  curl https://go.urbanairship.com/api/push \
+    -u "$appKey:$appSecret" \
+    -X POST \
+    -H 'Content-Type: application/json' \
+    -H 'Accept: application/vnd.urbanairship+json; version=3;' \
+    -d @- <<EOF
+{
+  "audience": {
+      "tag": "david"
+  },
+  "device_types": [
+      "ios"
+  ],
+  "notification": {
+      "alert": "Hey there! Don't forget to drink water and stay hydrated!",
+         "ios": {
+                  "badge":"+1"
+      }
+  },
+  "message": {
+      "title": "Hydration Reminder!",
+      "body": "Hi! This is a friendly reminder to drink some H2O and make a splash in your day!",
+      "content_type": "text/html",
+      "extra": {
+          "emoji_count": 5
+      },
+      "icons": {
+          "list_icon": "https://hangar-dl.urbanairship.com/binary/public/VWDwdOFjRTKLRxCeXTVP6g/a1f6916f-81d7-4034-ab54-7ad7d3548966"
+      }
+  }
+}
+EOF
+}
+
+sendPushNotification() {
+    local collapseId="$1"
+    local message="$2"
+    local sound="$3"
+    local badgeCount="${4:-0}"
+    local contentAvailable="${5:-true}"
+
+    local iosPayload=""
+    if [[ -n $collapseId ]]; then
+        iosPayload="\"collapse_id\":\"$collapseId\","
+    fi
+
+    local contentAvailablePart=""
+    if [[ $contentAvailable == true ]]; then
+        contentAvailablePart="\"content_available\": true,"
+    fi
+
+    local messagePart=""
+    if [[ -n $message ]]; then
+        messagePart="\"alert\":\"$message\","
+    fi
+
+    curl -X POST --user "$defaultAppKey:$defaultAppSecret" \
+         -H "Content-Type: application/json" \
+         --data '{
+            "audience": "all",
+            "notification": {
+                '"$messagePart"'
+                "ios": {
+                    '"$iosPayload"'
+                    '"$contentAvailablePart"'
+                    "sound": "'"$sound"'",
+                    "badge": '"$badgeCount"'
+                }
+            },
+            "device_types": ["ios"]
+         }' \
+         https://go.urbanairship.com/api/push
+}
+
+sendPushWithContentAvailable() {
+    echo "Sending Push with content_available set to true"
+    sendPushNotification "" "Background Update" "default" 0 true
+    echo "Push with content_available Completed"
+}
+
+sendThreePushesWithSameCollapseId() {
+    local collapseId="test-collapse"
+    echo "Starting 3 Pushes Test with Same Collapse ID"
+    for i in 1 2 3; do
+        sendPushNotification $collapseId "Message $i with collapse-id" "default"
+        sleep 1
+    done
+    echo "Test with Same Collapse ID Completed"
+}
+
+sendTenPushesWithDifferentCollapseIds() {
+    echo "Starting 10 Pushes Test with Different Collapse IDs"
+    for i in {1..10}; do
+        local collapseId="test-collapse-$i"
+        sendPushNotification $collapseId "Message with collapse-id $collapseId" "default"
+    done
+    echo "Test with Different Collapse IDs Completed"
+}
+
+sendPushWithAlertAndBadge() {
+    local collapseId="test-collapse-1"
+    echo "Sending Push with Alert and Collapse ID"
+    sendPushNotification $collapseId "This is an alert message" "default"
+
+    echo "Waiting for 5 seconds..."
+    sleep 5
+
+    echo "Sending Push with Badge and Same Collapse ID"
+    sendPushNotification $collapseId "" "default" 1
+    echo "Pushes with Alert and Badge Completed"
+}
