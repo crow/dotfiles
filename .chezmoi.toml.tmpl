@@ -1,6 +1,3 @@
-{{- $name := promptStringOnce . "name" "Your full name" -}}
-{{- $email := promptStringOnce . "email" "Your email address" -}}
-
 encryption = "age"
 
 [age]
@@ -12,5 +9,5 @@ encryption = "age"
     autoPush = true
 
 [data]
-    name = {{ $name | quote }}
-    email = {{ $email | quote }}
+    name = "David"
+    email = "jdavidcrow@gmail.com"
