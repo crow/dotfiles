@@ -72,19 +72,40 @@ fi
 
 # Step 5: clone + apply dotfiles
 step 5 "Cloning and applying dotfiles"
-if [ -d "$HOME/.local/share/chezmoi/.git" ]; then
-    success "Repo already cloned, pulling latest..."
-    chezmoi git pull || warn "Git pull failed, continuing with existing files"
-    chezmoi apply -v || die "chezmoi apply failed"
-else
+CHEZMOI_DIR="$HOME/.local/share/chezmoi"
+
+# Check if a different repo is already there
+if [ -d "$CHEZMOI_DIR/.git" ]; then
+    existing_remote=$(git -C "$CHEZMOI_DIR" remote get-url origin 2>/dev/null || echo "unknown")
+    if echo "$existing_remote" | grep -q "crow/dotfiles"; then
+        success "Correct repo already cloned, pulling latest..."
+        chezmoi git pull || warn "Git pull failed, continuing with existing files"
+        chezmoi apply -v || die "chezmoi apply failed"
+    else
+        warn "A different dotfiles repo is already at ~/.local/share/chezmoi/"
+        info "Current repo: $existing_remote"
+        echo ""
+        read -p "  Overwrite it with your dotfiles? This will back it up to ~/.local/share/chezmoi.bak (y/n): " overwrite
+        if [[ "$overwrite" == "y" ]]; then
+            mv "$CHEZMOI_DIR" "${CHEZMOI_DIR}.bak"
+            success "Backed up to ~/.local/share/chezmoi.bak"
+        else
+            die "Cancelled. Remove or back up ~/.local/share/chezmoi manually and re-run."
+        fi
+    fi
+fi
+
+# Clone if not present
+if [ ! -d "$CHEZMOI_DIR/.git" ]; then
     info "Trying SSH..."
-    if chezmoi init crow --ssh --apply -v 2>/dev/null; then
+    if chezmoi init crow --ssh 2>/dev/null; then
         success "Cloned via SSH"
     else
-        warn "SSH failed (no key for GitHub?), falling back to HTTPS..."
-        chezmoi init https://github.com/crow/dotfiles.git --apply -v || die "chezmoi init failed via both SSH and HTTPS"
+        warn "SSH failed, falling back to HTTPS..."
+        chezmoi init https://github.com/crow/dotfiles.git || die "chezmoi init failed via both SSH and HTTPS"
         success "Cloned via HTTPS"
     fi
+    chezmoi apply -v || die "chezmoi apply failed"
 fi
 
 # Step 6: brew packages
