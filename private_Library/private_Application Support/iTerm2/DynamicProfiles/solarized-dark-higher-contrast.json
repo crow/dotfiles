@@ -141,6 +141,26 @@
         "Green Component": 0.216,
         "Blue Component": 0.282,
         "Color Space": "sRGB"
+      },
+      "Option Key Sends": 2,
+      "Right Option Key Sends": 2,
+      "Keyboard Map": {
+        "0xf702-0x280000": {
+          "Action": 10,
+          "Text": "b"
+        },
+        "0xf703-0x280000": {
+          "Action": 10,
+          "Text": "f"
+        },
+        "0xf702-0x2a0000": {
+          "Action": 10,
+          "Text": "b"
+        },
+        "0xf703-0x2a0000": {
+          "Action": 10,
+          "Text": "f"
+        }
       }
     }
   ]
