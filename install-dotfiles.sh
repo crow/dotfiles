@@ -111,8 +111,34 @@ if [ ! -d "$CHEZMOI_DIR/.git" ]; then
         chezmoi init https://github.com/crow/dotfiles.git || die "chezmoi init failed via both SSH and HTTPS"
         success "Cloned via HTTPS"
     fi
-    chezmoi apply -v || die "chezmoi apply failed"
 fi
+
+# Ensure chezmoi.toml exists (init may not create it if template prompts failed)
+CHEZMOI_CFG="$HOME/.config/chezmoi/chezmoi.toml"
+if [ ! -f "$CHEZMOI_CFG" ]; then
+    warn "chezmoi.toml missing -- creating it now"
+    read -p "  Your full name: " cfg_name
+    read -p "  Your email: " cfg_email
+    mkdir -p "$HOME/.config/chezmoi"
+    cat > "$CHEZMOI_CFG" <<EOF
+encryption = "age"
+
+[age]
+    identity = "~/.config/chezmoi/key.txt"
+    recipient = "age1yaa0vvhceuc8p4ugenhmqgpzrffsew7ejnthyjzsj5nvgexqjcus7a60la"
+
+[git]
+    autoCommit = true
+    autoPush = true
+
+[data]
+    name = "$cfg_name"
+    email = "$cfg_email"
+EOF
+    success "chezmoi.toml created"
+fi
+
+chezmoi apply -v || die "chezmoi apply failed"
 
 # Step 6: brew packages
 step 6 "Installing packages from Brewfile"
