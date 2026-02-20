@@ -74,23 +74,29 @@ fi
 step 5 "Cloning and applying dotfiles"
 CHEZMOI_DIR="$HOME/.local/share/chezmoi"
 
-# Check if a different repo is already there
-if [ -d "$CHEZMOI_DIR/.git" ]; then
-    existing_remote=$(git -C "$CHEZMOI_DIR" remote get-url origin 2>/dev/null || echo "unknown")
+# Check if something is already at the chezmoi dir
+if [ -d "$CHEZMOI_DIR" ]; then
+    if [ -d "$CHEZMOI_DIR/.git" ]; then
+        existing_remote=$(git -C "$CHEZMOI_DIR" remote get-url origin 2>/dev/null || echo "unknown")
+    else
+        existing_remote="unknown (not a git repo)"
+    fi
+
     if echo "$existing_remote" | grep -q "crow/dotfiles"; then
         success "Correct repo already cloned, pulling latest..."
         chezmoi git pull || warn "Git pull failed, continuing with existing files"
         chezmoi apply -v || die "chezmoi apply failed"
     else
-        warn "A different dotfiles repo is already at ~/.local/share/chezmoi/"
-        info "Current repo: $existing_remote"
+        warn "Something already exists at ~/.local/share/chezmoi/"
+        info "Contents: $(ls "$CHEZMOI_DIR" | head -5 | tr '\n' ' ')..."
+        [ "$existing_remote" != "unknown (not a git repo)" ] && info "Remote: $existing_remote"
         echo ""
-        read -p "  Overwrite it with your dotfiles? This will back it up to ~/.local/share/chezmoi.bak (y/n): " overwrite
+        read -p "  Overwrite it? It will be backed up to ~/.local/share/chezmoi.bak (y/n): " overwrite
         if [[ "$overwrite" == "y" ]]; then
             mv "$CHEZMOI_DIR" "${CHEZMOI_DIR}.bak"
             success "Backed up to ~/.local/share/chezmoi.bak"
         else
-            die "Cancelled. Remove or back up ~/.local/share/chezmoi manually and re-run."
+            die "Cancelled. Remove ~/.local/share/chezmoi manually and re-run."
         fi
     fi
 fi
