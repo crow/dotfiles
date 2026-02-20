@@ -50,40 +50,65 @@ function chezmoi-edit() {
     local target
     if [[ "$choice" == "0" ]]; then
         target=".zshrc"
-        local secret_value=$(pbpaste 2>/dev/null)
+        echo ""
 
-        if [[ -z "$secret_value" ]]; then
-            echo "Clipboard is empty. Copy your secret first."
+        # Step 1: key name
+        local key_name=""
+        read "key_name?Variable name (e.g. OPENAI_API_KEY): "
+        if [[ -z "$key_name" ]]; then
+            echo "No name provided. Cancelled."
+            return 1
+        fi
+        key_name="${key_name:u}"  # uppercase
+
+        # Step 2: key value
+        local key_value=""
+        echo ""
+        echo "Value source:"
+        echo "  1) Paste from clipboard"
+        echo "  2) Type it in"
+        echo ""
+        local value_choice
+        read "value_choice?Choose (1/2): "
+
+        if [[ "$value_choice" == "1" ]]; then
+            key_value=$(pbpaste 2>/dev/null)
+            if [[ -z "$key_value" ]]; then
+                echo "Clipboard is empty."
+                return 1
+            fi
+            # If clipboard has KEY=value format, extract just the value
+            if [[ "$key_value" =~ ^(export[[:space:]]+)?[A-Za-z_][A-Za-z0-9_]*=[\"\']?(.+?)[\"\']?$ ]]; then
+                key_value="${match[2]}"
+            fi
+            echo "Value read from clipboard (${#key_value} chars)."
+        elif [[ "$value_choice" == "2" ]]; then
+            read "key_value?Value: "
+            if [[ -z "$key_value" ]]; then
+                echo "No value provided. Cancelled."
+                return 1
+            fi
+        else
+            echo "Invalid choice. Cancelled."
             return 1
         fi
 
-        # Parse clipboard -- handle KEY=value, export KEY="value", or raw value
-        local key_name=""
-        local key_value=""
-        if [[ "$secret_value" =~ ^(export[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*)=[\"\']?(.+?)[\"\']?$ ]]; then
-            key_name="${match[2]}"
-            key_value="${match[3]}"
-        else
-            key_value="$secret_value"
-        fi
-
-        # Show what we found
+        # Step 3: optional expiry
         echo ""
-        if [[ -n "$key_name" ]]; then
-            echo "Detected: $key_name"
-        else
-            echo "Clipboard value: ${key_value:0:20}..."
-            read "key_name?Enter variable name (e.g. OPENAI_API_KEY): "
-            if [[ -z "$key_name" ]]; then
-                echo "No name provided. Cancelled."
-                return 1
+        local expiry=""
+        local expiry_choice
+        read "expiry_choice?Add expiry date? (y/n): "
+        if [[ "$expiry_choice" == "y" ]]; then
+            read "expiry?Expiry date (YYYY-MM-DD): "
+            if [[ -n "$expiry" ]]; then
+                expiry=" | expires: ${expiry}"
             fi
         fi
 
-        # Confirm
+        # Step 4: confirm
         echo ""
         echo "Will add to .zshrc:"
-        echo "  export ${key_name}=\"${key_value:0:20}...\""
+        echo "  export ${key_name}=\"${key_value:0:20}...\" # added: $(date +%Y-%m-%d)${expiry} | accessed: never"
         echo ""
         local confirm
         read "confirm?Proceed? (y/n): "
@@ -106,7 +131,7 @@ function chezmoi-edit() {
         fi
 
         local today=$(date +%Y-%m-%d)
-        echo "export ${key_name}=\"${key_value}\" # added: ${today} | accessed: never" >> "$tmpfile"
+        echo "export ${key_name}=\"${key_value}\" # added: ${today}${expiry} | accessed: never" >> "$tmpfile"
         age -e -r "$recipient" -o "$src" "$tmpfile" 2>/dev/null
         rm -f "$tmpfile"
 
