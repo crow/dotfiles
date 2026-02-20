@@ -116,11 +116,9 @@ fi
 # Ensure chezmoi.toml exists (init may not create it if template prompts failed)
 CHEZMOI_CFG="$HOME/.config/chezmoi/chezmoi.toml"
 if [ ! -f "$CHEZMOI_CFG" ]; then
-    warn "chezmoi.toml missing -- creating it now"
-    read -p "  Your full name: " cfg_name
-    read -p "  Your email: " cfg_email
+    warn "chezmoi.toml missing -- creating from known config"
     mkdir -p "$HOME/.config/chezmoi"
-    cat > "$CHEZMOI_CFG" <<EOF
+    cat > "$CHEZMOI_CFG" <<'EOF'
 encryption = "age"
 
 [age]
@@ -132,8 +130,8 @@ encryption = "age"
     autoPush = true
 
 [data]
-    name = "$cfg_name"
-    email = "$cfg_email"
+    name = "David"
+    email = "jdavidcrow@gmail.com"
 EOF
     success "chezmoi.toml created"
 fi
