@@ -27,6 +27,7 @@ function chezmoi-edit() {
 
     echo "Chezmoi managed files:"
     echo "─────────────────────────────────"
+    echo "   0) Add secret key (opens .zshrc)"
 
     while IFS= read -r file; do
         files+=("$file")
@@ -35,7 +36,7 @@ function chezmoi-edit() {
     done < <(chezmoi managed --include=files | sort)
 
     echo "─────────────────────────────────"
-    echo "  q) Quit"
+    echo "   q) Quit"
     echo ""
 
     local choice
@@ -46,14 +47,22 @@ function chezmoi-edit() {
         return 0
     fi
 
-    if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#files[@]} )); then
+    local target
+    if [[ "$choice" == "0" ]]; then
+        target=".zshrc"
+        echo ""
+        echo "Opening .zshrc (encrypted) to add secret..."
+        echo "  Add your key as: export KEY_NAME=\"value\""
+        echo ""
+    elif [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#files[@]} )); then
+        target="${files[$choice]}"
+        echo ""
+        echo "Opening: $target"
+    else
         echo "Invalid selection."
         return 1
     fi
 
-    local target="${files[$choice]}"
-    echo ""
-    echo "Opening: $target"
     chezmoi edit "$HOME/$target"
 
     echo ""
