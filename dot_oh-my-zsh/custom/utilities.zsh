@@ -105,7 +105,8 @@ function chezmoi-edit() {
             return 1
         fi
 
-        echo "export ${key_name}=\"${key_value}\"" >> "$tmpfile"
+        local today=$(date +%Y-%m-%d)
+        echo "export ${key_name}=\"${key_value}\" # added: ${today} | accessed: never" >> "$tmpfile"
         age -e -r "$recipient" -o "$src" "$tmpfile" 2>/dev/null
         rm -f "$tmpfile"
 
@@ -142,36 +143,37 @@ function chezmoi-edit() {
 }
 
 # Interactive secret lookup -- copies a secret value to clipboard
+# Updates "accessed:" date in the comment when a secret is copied
 function chezmoi-secret() {
     local secrets=()
     local names=()
+    local sources=()
     local i=1
 
-    # Decrypt and parse all export lines from .zshrc
     local src="$HOME/.local/share/chezmoi/encrypted_dot_zshrc.age"
+    local airship_src="$HOME/.local/share/chezmoi/dot_oh-my-zsh/custom/encrypted_airship.zsh.age"
     local age_key="$HOME/.config/chezmoi/key.txt"
+    local recipient=$(grep 'recipient' "$HOME/.config/chezmoi/chezmoi.toml" | sed 's/.*= *"\(.*\)"/\1/')
 
     if [[ ! -f "$src" ]]; then
         echo "No encrypted .zshrc found."
         return 1
     fi
 
-    local decrypted
-    decrypted=$(age -d -i "$age_key" "$src" 2>/dev/null)
+    local zshrc_decrypted
+    zshrc_decrypted=$(age -d -i "$age_key" "$src" 2>/dev/null)
     if [[ $? -ne 0 ]]; then
         echo "Failed to decrypt. Check your age key."
         return 1
     fi
 
-    # Also parse encrypted airship.zsh if it exists
-    local airship_src="$HOME/.local/share/chezmoi/dot_oh-my-zsh/custom/encrypted_airship.zsh.age"
+    local airship_decrypted=""
     if [[ -f "$airship_src" ]]; then
-        local airship_decrypted
         airship_decrypted=$(age -d -i "$age_key" "$airship_src" 2>/dev/null)
-        if [[ $? -eq 0 ]]; then
-            decrypted="$decrypted"$'\n'"$airship_decrypted"
-        fi
     fi
+
+    local all_decrypted="$zshrc_decrypted"
+    [[ -n "$airship_decrypted" ]] && all_decrypted="$all_decrypted"$'\n'"$airship_decrypted"
 
     echo "Secrets:"
     echo "─────────────────────────────────"
@@ -180,15 +182,23 @@ function chezmoi-secret() {
         if [[ "$line" =~ ^export[[:space:]]+([A-Za-z_][A-Za-z0-9_]*)=[\"\']?(.+?)[\"\']?$ ]]; then
             local name="${match[1]}"
             local value="${match[2]}"
-            # Strip trailing quote if present
-            value="${value%\"}"
-            value="${value%\'}"
+            # Strip trailing quote and any comment
+            value="${value%\"*}"
+            value="${value%\'*}"
             names+=("$name")
             secrets+=("$value")
+
+            # Track which file this came from
+            if [[ -n "$airship_decrypted" ]] && echo "$airship_decrypted" | grep -q "^export ${name}="; then
+                sources+=("airship")
+            else
+                sources+=("zshrc")
+            fi
+
             printf "  %2d) %s\n" "$i" "$name"
             ((i++))
         fi
-    done <<< "$decrypted"
+    done <<< "$all_decrypted"
 
     echo "─────────────────────────────────"
     echo "   q) Quit"
@@ -213,8 +223,36 @@ function chezmoi-secret() {
     fi
 
     echo -n "${secrets[$choice]}" | pbcopy
+
+    # Update accessed date in the source file
+    local selected_name="${names[$choice]}"
+    local today=$(date +%Y-%m-%d)
+    local target_src="$src"
+    local target_decrypted="$zshrc_decrypted"
+    if [[ "${sources[$choice]}" == "airship" ]]; then
+        target_src="$airship_src"
+        target_decrypted="$airship_decrypted"
+    fi
+
+    local tmpfile=$(mktemp)
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^export[[:space:]]+${selected_name}= ]]; then
+            if [[ "$line" =~ "# added:" ]]; then
+                # Update existing accessed date
+                line=$(echo "$line" | sed "s/accessed: [^ ]*/accessed: ${today}/")
+            else
+                # No tracking comment yet -- add one
+                line="${line} # added: unknown | accessed: ${today}"
+            fi
+        fi
+        echo "$line"
+    done <<< "$target_decrypted" > "$tmpfile"
+
+    age -e -r "$recipient" -o "$target_src" "$tmpfile" 2>/dev/null
+    rm -f "$tmpfile"
+
     echo ""
-    echo "Copied ${names[$choice]} to clipboard."
+    echo "Copied ${selected_name} to clipboard."
 }
 
 # PGP key paths
