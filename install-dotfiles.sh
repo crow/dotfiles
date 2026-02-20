@@ -42,9 +42,26 @@ else
     success "Already installed"
 fi
 
-# Step 4: age key
+# Step 4: age key + chezmoi config
 step 4 "Age decryption key"
 mkdir -p "$HOME/.config/chezmoi"
+
+# Write chezmoi.toml FIRST so chezmoi never tries to prompt from the template
+cat > "$HOME/.config/chezmoi/chezmoi.toml" <<'EOF'
+encryption = "age"
+
+[age]
+    identity = "~/.config/chezmoi/key.txt"
+    recipient = "age1yaa0vvhceuc8p4ugenhmqgpzrffsew7ejnthyjzsj5nvgexqjcus7a60la"
+
+[git]
+    autoCommit = true
+    autoPush = true
+
+[data]
+    name = "David"
+    email = "jdavidcrow@gmail.com"
+EOF
 if [ -f "$HOME/.config/chezmoi/key.txt" ]; then
     success "Key already exists at ~/.config/chezmoi/key.txt"
 else
