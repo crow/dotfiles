@@ -174,14 +174,15 @@ chezmoi apply -v || die "chezmoi apply failed"
 
 # Step 6: brew packages
 step 6 "Installing packages from Brewfile"
-brewfile="$HOME/.local/share/chezmoi/Brewfile"
+chezmoi_src=$(chezmoi source-path 2>/dev/null || echo "$HOME/.local/share/chezmoi")
+brewfile="$chezmoi_src/Brewfile"
 if [ ! -f "$brewfile" ]; then
-    warn "Brewfile not in local chezmoi dir, downloading from GitHub..."
+    warn "Brewfile not in chezmoi source dir, downloading from GitHub..."
     brewfile=$(mktemp)
     curl -fsSL "https://raw.githubusercontent.com/crow/dotfiles/main/Brewfile" -o "$brewfile" || { warn "Could not download Brewfile, skipping packages"; brewfile=""; }
 fi
 if [ -n "$brewfile" ] && [ -f "$brewfile" ]; then
-    brew bundle --file="$brewfile" --no-lock || warn "Some packages failed -- run 'brew bundle --file=~/.local/share/chezmoi/Brewfile' to retry"
+    brew bundle --file="$brewfile" || warn "Some packages failed -- run 'brew bundle --file=$chezmoi_src/Brewfile' to retry"
 fi
 
 # Step 7: SSH key
