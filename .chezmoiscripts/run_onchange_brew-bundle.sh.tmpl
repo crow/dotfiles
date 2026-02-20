@@ -1,3 +1,14 @@
 #!/bin/bash
+
+{{ if eq .profile "personal" -}}
 # {{ include "Brewfile" | sha256sum }}
+echo "Installing all packages from Brewfile..."
 brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile"
+
+{{ else -}}
+# Core shell tools only (work/bot profiles skip the full Brewfile)
+for tool in bat eza zoxide gh; do
+    command -v "$tool" &>/dev/null || brew install "$tool"
+done
+
+{{ end -}}
