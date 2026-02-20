@@ -1,6 +1,6 @@
 # Dotfiles
 
-Managed with [chezmoi](https://chezmoi.io/) + [LastPass](https://www.lastpass.com/) for secrets.
+Managed with [chezmoi](https://chezmoi.io/) + [age](https://github.com/FiloSottile/age) encryption for secrets.
 
 ## New Machine Setup
 
@@ -11,16 +11,19 @@ curl -fsLS https://raw.githubusercontent.com/jdavidcrow/dotfiles/main/bootstrap.
 Or step by step:
 
 ```bash
-# Install chezmoi
+# Install chezmoi + age
 sh -c "$(curl -fsLS get.chezmoi.io)"
+brew install age
 
 # Initialize from this repo
 chezmoi init jdavidcrow --ssh
 
-# Login to LastPass (secrets are fetched at apply time)
-lpass login jdavidcrow@gmail.com
+# Copy your age key to the new machine
+# (from password manager, USB drive, etc.)
+mkdir -p ~/.config/chezmoi
+# paste key into ~/.config/chezmoi/key.txt
 
-# Apply dotfiles
+# Apply dotfiles (encrypted files are decrypted automatically)
 chezmoi apply -v
 ```
 
@@ -28,10 +31,10 @@ chezmoi apply -v
 
 | File | Manages |
 |---|---|
-| `dot_zshrc.tmpl` | `~/.zshrc` - shell config with secrets from LastPass |
+| `encrypted_dot_zshrc.age` | `~/.zshrc` - shell config with secrets (age-encrypted) |
 | `dot_gitconfig.tmpl` | `~/.gitconfig` - git user config |
 | `dot_oh-my-zsh/custom/aliases.zsh` | Shell aliases |
-| `dot_oh-my-zsh/custom/airship.zsh.tmpl` | Airship push functions (secrets from LastPass) |
+| `encrypted_airship.zsh.age` | Airship push functions with secrets (age-encrypted) |
 | `dot_oh-my-zsh/custom/git-helpers.zsh` | Git helper functions |
 | `dot_oh-my-zsh/custom/dev-tools.zsh` | Dev tools, PATH setup, script wrappers |
 | `dot_oh-my-zsh/custom/utilities.zsh` | General utilities, PGP functions |
@@ -55,5 +58,6 @@ git add -A && git commit -m "update dotfiles" && git push
 
 ## Secrets
 
-All secrets are stored in LastPass under the `Dotfiles/` folder as Secure Notes.
-Template files (`.tmpl`) reference them at `chezmoi apply` time -- the git repo never contains plaintext secrets.
+Files containing secrets are age-encrypted in the git repo (`.age` files).
+Your age key at `~/.config/chezmoi/key.txt` decrypts them at `chezmoi apply` time.
+**Back up your age key** -- without it you cannot decrypt your dotfiles.

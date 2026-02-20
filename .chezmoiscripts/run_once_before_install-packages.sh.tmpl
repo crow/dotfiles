@@ -10,10 +10,10 @@ if ! command -v brew &> /dev/null; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-# Install LastPass CLI if not present
-if ! command -v lpass &> /dev/null; then
-    echo "Installing LastPass CLI..."
-    brew install lastpass-cli
+# Install age if not present
+if ! command -v age &> /dev/null; then
+    echo "Installing age..."
+    brew install age
 fi
 
 # Install Oh My Zsh if not present
