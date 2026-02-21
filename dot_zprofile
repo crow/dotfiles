@@ -1,5 +1,9 @@
 
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$HOMEBREW_PREFIX/opt/nvm/nvm.sh" ] && . "$HOMEBREW_PREFIX/opt/nvm/nvm.sh"
+
 # Added by `rbenv init`
 eval "$(rbenv init - --no-rehash zsh)"
