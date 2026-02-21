@@ -1,20 +1,4 @@
 {
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"{{ .chezmoi.homeDir }}/.claude/hooks/gsd-check-update.js\""
-          }
-        ]
-      }
-    ]
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "node \"{{ .chezmoi.homeDir }}/.claude/hooks/gsd-statusline.js\""
-  },
   "enabledPlugins": {
     "context7@claude-plugins-official": true,
     "greptile@claude-plugins-official": true,
@@ -24,55 +8,20 @@
   "alwaysThinkingEnabled": true,
   "skipDangerousModePermissionPrompt": true,
   "mcpServers": {
-    "airship-docs": {
+    "airship-mcp": {
       "command": "uv",
       "args": [
         "run",
         "--directory",
-        "{{ .chezmoi.homeDir }}/source/internal-airship-mcp/airship-docs",
-        "airship-docs"
-      ]
-    },
-    "airship-api": {
-      "command": "uv",
-      "args": [
-        "run",
-        "--directory",
-        "{{ .chezmoi.homeDir }}/source/internal-airship-mcp/airship-api",
-        "airship-api"
+        "{{ .chezmoi.homeDir }}/source/internal-airship-mcp/airship-mcp",
+        "python",
+        "server.py"
       ],
       "env": {
         "AIRSHIP_APP_KEY": "${AIRSHIP_DEV_APP_KEY}",
         "AIRSHIP_MASTER_SECRET": "${AIRSHIP_DEV_APP_MASTER_SECRET}",
         "AIRSHIP_API_URL": "https://go.urbanairship.com"
       }
-    },
-    "airship-custom-views": {
-      "command": "uv",
-      "args": [
-        "run",
-        "--directory",
-        "{{ .chezmoi.homeDir }}/source/internal-airship-mcp/airship-custom-views",
-        "airship-custom-views"
-      ]
-    },
-    "airship-migration": {
-      "command": "uv",
-      "args": [
-        "run",
-        "--directory",
-        "{{ .chezmoi.homeDir }}/source/internal-airship-mcp/airship_migration",
-        "airship-migration"
-      ]
-    },
-    "airship-sample-generator": {
-      "command": "uv",
-      "args": [
-        "run",
-        "--directory",
-        "{{ .chezmoi.homeDir }}/source/internal-airship-mcp/airship-sample-generator",
-        "airship-sample-generator"
-      ]
     },
     "XcodeBuildMCP": {
       "command": "npx",

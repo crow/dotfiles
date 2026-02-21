@@ -17,7 +17,7 @@ function chezmoidir() { open "$HOME/.local/share/chezmoi"; }
 
 # nvm - Node Version Manager
 export NVM_DIR="$HOME/.nvm"
-_BREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+_BREW_PREFIX="${HOMEBREW_PREFIX:-/usr/local}"
 [ -s "$_BREW_PREFIX/opt/nvm/nvm.sh" ] && . "$_BREW_PREFIX/opt/nvm/nvm.sh"
 [ -s "$_BREW_PREFIX/opt/nvm/etc/bash_completion.d/nvm" ] && . "$_BREW_PREFIX/opt/nvm/etc/bash_completion.d/nvm"
 
