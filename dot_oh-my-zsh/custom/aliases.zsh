@@ -10,4 +10,5 @@ alias python=python3
 alias pip=pip3
 alias zshconfig="code ~/.zshrc"
 alias ohmyzsh="code ~/.oh-my-zsh"
-# claude CLI: brew install claude-code (or npm i -g @anthropic-ai/claude-code)
+# claude CLI — installed at ~/.claude/local/claude by the Claude Code installer
+[[ -f "$HOME/.claude/local/claude" ]] && alias claude="$HOME/.claude/local/claude"
