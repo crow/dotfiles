@@ -27,18 +27,22 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || { echo "Oh My Zsh install failed"; exit 1; }
 fi
 
-{{ if ne .profile "personal" -}}
-# Install node if not present (needed for Claude CLI)
-if ! command -v node &>/dev/null; then
-    echo "Installing node..."
-    brew install node || echo "node install failed, skipping"
+# Ensure node@22 (LTS) is installed and linked
+if ! brew list node@22 &>/dev/null; then
+    echo "Installing node@22..."
+    brew install node@22 || echo "node@22 install failed, skipping"
+fi
+# Unlink any newer node and link node@22
+if command -v node &>/dev/null && [[ "$(node --version)" != v22.* ]]; then
+    echo "Linking node@22 (LTS) over $(node --version)..."
+    brew unlink node 2>/dev/null
+    brew link node@22 --force --overwrite 2>/dev/null
 fi
 
-# Install Claude CLI if not present
+# Install Claude Code CLI via brew if not present
 if ! command -v claude &>/dev/null; then
-    echo "Installing Claude CLI..."
-    npm install -g @anthropic-ai/claude-code || echo "Claude CLI install failed, skipping"
+    echo "Installing Claude Code..."
+    brew install claude-code || echo "claude-code install failed, skipping"
 fi
-{{ end -}}
 
 {{ end -}}
