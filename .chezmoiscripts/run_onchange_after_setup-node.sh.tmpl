@@ -1,0 +1,43 @@
+#!/bin/bash
+# {{ include "dot_oh-my-zsh/custom/dev-tools.zsh" | sha256sum }}
+# Ensures nvm + Node 22 LTS are available
+
+set -e
+
+echo "[setup-node] Checking nvm and Node..."
+
+# Install nvm via brew if missing
+if ! brew list nvm &>/dev/null 2>&1; then
+    echo "[setup-node] Installing nvm via brew..."
+    brew install nvm
+fi
+
+# Set up nvm
+export NVM_DIR="$HOME/.nvm"
+mkdir -p "$NVM_DIR"
+
+# Find and source nvm
+BREW_PREFIX="$(brew --prefix)"
+if [ -s "$BREW_PREFIX/opt/nvm/nvm.sh" ]; then
+    . "$BREW_PREFIX/opt/nvm/nvm.sh"
+else
+    echo "[setup-node] ERROR: nvm.sh not found at $BREW_PREFIX/opt/nvm/nvm.sh"
+    exit 1
+fi
+
+# Verify nvm loaded
+if ! type nvm &>/dev/null; then
+    echo "[setup-node] ERROR: nvm function not available after sourcing"
+    exit 1
+fi
+
+echo "[setup-node] nvm $(nvm --version) loaded"
+
+# Install Node 22 if not present
+if ! nvm ls 22 &>/dev/null; then
+    echo "[setup-node] Installing Node 22 LTS..."
+    nvm install 22
+fi
+
+nvm alias default 22 2>/dev/null
+echo "[setup-node] Node $(nvm version default) set as default"
