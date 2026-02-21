@@ -6,6 +6,84 @@ function refresh() {
     exec zsh
 }
 
+# Syncs drifted target files back to chezmoi source.
+# Use this when an installer (e.g. claude, nvm, brew) has modified a managed
+# file directly on disk and you want to capture those changes in chezmoi.
+# For the reverse (applying source changes to disk) use: chezmoi apply
+function chezmoi-sync() {
+    local recipient
+    recipient=$(grep 'recipient' "$HOME/.config/chezmoi/chezmoi.toml" | sed 's/.*= *"\(.*\)"/\1/')
+
+    # Parse drifted file paths from chezmoi diff output
+    local raw_diff
+    raw_diff=$(chezmoi diff --no-pager 2>/dev/null)
+
+    if [[ -z "$raw_diff" ]]; then
+        echo "chezmoi: all managed files are in sync."
+        return 0
+    fi
+
+    local -a drifted_files
+    while IFS= read -r line; do
+        # Lines look like: diff --git a/.zshrc b/.zshrc
+        if [[ "$line" =~ ^'diff --git a/'(.+)' b/' ]]; then
+            drifted_files+=("$HOME/${match[1]}")
+        fi
+    done <<< "$raw_diff"
+
+    if (( ${#drifted_files[@]} == 0 )); then
+        echo "chezmoi: all managed files are in sync."
+        return 0
+    fi
+
+    echo "Drifted files:"
+    for f in "${drifted_files[@]}"; do echo "  ${f/$HOME/~}"; done
+    echo ""
+
+    local synced=0 failed=0
+
+    for file in "${drifted_files[@]}"; do
+        printf "  Syncing %s... " "${file/$HOME/\~}"
+        local src
+        src=$(chezmoi source-path "$file" 2>/dev/null)
+
+        if [[ "$src" == *.age ]]; then
+            # Encrypted file: bypass chezmoi add (which needs TTY) and use age directly
+            if age -r "$recipient" -o "$src" "$file" 2>/dev/null; then
+                echo "✓ (encrypted)"
+                (( synced++ ))
+            else
+                echo "✗ (encryption failed)"
+                (( failed++ ))
+            fi
+        else
+            # Plain file: chezmoi add handles it (autoCommit will fire)
+            if chezmoi add "$file" 2>/dev/null; then
+                echo "✓"
+                (( synced++ ))
+            else
+                echo "✗"
+                (( failed++ ))
+            fi
+        fi
+    done
+
+    echo ""
+    if (( synced > 0 )); then
+        # Commit any remaining unstaged changes (encrypted files bypassed chezmoi add)
+        local repo="$HOME/.local/share/chezmoi"
+        if ! git -C "$repo" diff --staged --quiet 2>/dev/null || ! git -C "$repo" diff --quiet 2>/dev/null; then
+            git -C "$repo" add -A && \
+            git -C "$repo" commit -m "sync: capture drifted managed files" && \
+            git -C "$repo" push && \
+            echo "Pushed to remote." || echo "Warning: commit/push failed."
+        fi
+        echo "Synced $synced file(s) to chezmoi."
+    fi
+    (( failed > 0 )) && echo "Failed to sync $failed file(s)." && return 1
+    return 0
+}
+
 # Creates a .webloc link file on the Desktop
 function genlinkfile {
     echo "Enter the URL for the link file:"

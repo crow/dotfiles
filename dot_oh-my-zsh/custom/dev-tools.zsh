@@ -15,6 +15,15 @@ preexec_functions+=(_shell_autoreload)
 # Opens chezmoi source directory in Finder
 function chezmoidir() { open "$HOME/.local/share/chezmoi"; }
 
+# Warn once per session if any chezmoi-managed files have drifted from source
+# (e.g. an installer modified ~/.zshrc directly without going through chezmoi)
+if [[ -z "$_CHEZMOI_DRIFT_CHECKED" ]]; then
+    export _CHEZMOI_DRIFT_CHECKED=1
+    if ! chezmoi diff --quiet 2>/dev/null; then
+        echo "⚠️  chezmoi: managed files have drifted. Run 'chezmoi diff' to review, 'chezmoi-sync' to save local changes."
+    fi
+fi
+
 # nvm - Node Version Manager
 export NVM_DIR="$HOME/.nvm"
 _BREW_PREFIX="${HOMEBREW_PREFIX:-/usr/local}"
