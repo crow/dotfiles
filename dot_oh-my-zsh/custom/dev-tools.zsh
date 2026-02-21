@@ -15,6 +15,11 @@ preexec_functions+=(_shell_autoreload)
 # Opens chezmoi source directory in Finder
 function chezmoidir() { open "$HOME/.local/share/chezmoi"; }
 
+# nvm - Node Version Manager
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && . "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+
 # PATH additions
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH="/Applications/PrusaSlicer.app/Contents/MacOS:$PATH"

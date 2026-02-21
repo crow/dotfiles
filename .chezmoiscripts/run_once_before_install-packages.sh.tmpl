@@ -27,16 +27,15 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended || { echo "Oh My Zsh install failed"; exit 1; }
 fi
 
-# Ensure node@22 (LTS) is installed and linked
-if ! brew list node@22 &>/dev/null; then
-    echo "Installing node@22..."
-    brew install node@22 || echo "node@22 install failed, skipping"
-fi
-# Unlink any newer node and link node@22
-if command -v node &>/dev/null && [[ "$(node --version)" != v22.* ]]; then
-    echo "Linking node@22 (LTS) over $(node --version)..."
-    brew unlink node 2>/dev/null
-    brew link node@22 --force --overwrite 2>/dev/null
+# Ensure nvm is loaded and Node 22 LTS is available
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"
+if command -v nvm &>/dev/null; then
+    if ! nvm ls 22 &>/dev/null; then
+        echo "Installing Node 22 LTS via nvm..."
+        nvm install 22 || echo "nvm install 22 failed, skipping"
+    fi
+    nvm alias default 22 2>/dev/null
 fi
 
 # Install Claude Code CLI via brew if not present
