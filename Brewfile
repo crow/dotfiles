@@ -104,3 +104,4 @@ vscode "vscjava.vscode-maven"
 
 # Cargo
 cargo "mdbook"
+cask "claude-code"
