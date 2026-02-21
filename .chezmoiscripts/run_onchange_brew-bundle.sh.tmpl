@@ -6,9 +6,22 @@ echo "Installing packages from Brewfile..."
 brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile" || echo "Some Brewfile packages failed — run 'brew bundle --file=~/.local/share/chezmoi/Brewfile' to retry"
 
 {{ else -}}
-# Core shell tools only (work/bot profiles skip the full Brewfile)
-for tool in bat eza zoxide gh; do
+# {{ include "Brewfile" | sha256sum }}
+# Essential tools for work/bot profiles
+for tool in bat eza zoxide gh nvm; do
     command -v "$tool" &>/dev/null || brew install "$tool" || echo "$tool install failed, skipping"
 done
+
+# Ensure nvm directory exists and node 22 LTS is installed
+export NVM_DIR="$HOME/.nvm"
+mkdir -p "$NVM_DIR"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"
+if command -v nvm &>/dev/null; then
+    nvm install 22 2>/dev/null
+    nvm alias default 22 2>/dev/null
+fi
+
+# Claude Code CLI
+command -v claude &>/dev/null || brew install claude-code || echo "claude-code install failed, skipping"
 
 {{ end -}}
