@@ -8,17 +8,26 @@ brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile" || echo "Some Brewfile pa
 {{ else -}}
 # {{ include "Brewfile" | sha256sum }}
 # Essential tools for work/bot profiles
-for tool in bat eza zoxide gh nvm; do
+for tool in bat eza zoxide gh; do
     command -v "$tool" &>/dev/null || brew install "$tool" || echo "$tool install failed, skipping"
 done
 
-# Ensure nvm directory exists and node 22 LTS is installed
+# nvm (installed via brew, loaded as shell function)
+if ! brew list nvm &>/dev/null; then
+    echo "Installing nvm..."
+    brew install nvm || echo "nvm install failed, skipping"
+fi
 export NVM_DIR="$HOME/.nvm"
 mkdir -p "$NVM_DIR"
 [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"
-if command -v nvm &>/dev/null; then
-    nvm install 22 2>/dev/null
+if type nvm &>/dev/null; then
+    if ! nvm ls 22 &>/dev/null; then
+        echo "Installing Node 22 LTS..."
+        nvm install 22
+    fi
     nvm alias default 22 2>/dev/null
+else
+    echo "Warning: nvm not available after install"
 fi
 
 # Claude Code CLI
