@@ -19,7 +19,9 @@ if ! brew list nvm &>/dev/null; then
 fi
 export NVM_DIR="$HOME/.nvm"
 mkdir -p "$NVM_DIR"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"
+# Load nvm - try both Apple Silicon and Intel brew paths
+BREW_PREFIX="$(brew --prefix 2>/dev/null || echo /opt/homebrew)"
+[ -s "$BREW_PREFIX/opt/nvm/nvm.sh" ] && . "$BREW_PREFIX/opt/nvm/nvm.sh"
 if type nvm &>/dev/null; then
     if ! nvm ls 22 &>/dev/null; then
         echo "Installing Node 22 LTS..."

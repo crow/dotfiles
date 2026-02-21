@@ -17,8 +17,9 @@ function chezmoidir() { open "$HOME/.local/share/chezmoi"; }
 
 # nvm - Node Version Manager
 export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && . "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+_BREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
+[ -s "$_BREW_PREFIX/opt/nvm/nvm.sh" ] && . "$_BREW_PREFIX/opt/nvm/nvm.sh"
+[ -s "$_BREW_PREFIX/opt/nvm/etc/bash_completion.d/nvm" ] && . "$_BREW_PREFIX/opt/nvm/etc/bash_completion.d/nvm"
 
 # PATH additions
 export ANDROID_HOME=$HOME/Library/Android/sdk
